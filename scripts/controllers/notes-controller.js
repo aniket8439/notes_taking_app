@@ -1,4 +1,7 @@
+//import db from '../services/firebaseconf.js';
 import { noteOperation } from '../services/note-services.js';
+
+
 window.addEventListener('load', init);
 
 function init() {
@@ -17,7 +20,24 @@ function showCount() {
 function bindEvents() {
     document.querySelector('#add').addEventListener('click', addNote);
     document.querySelector('#delete').addEventListener('click', deleteMarked);
+    document.querySelector('#search').addEventListener('click', search);
+    document.querySelector('#sort').addEventListener('click', sorted);
+    document.querySelector('#update').addEventListener('click', updateMarked);
+    document.querySelector('#save').addEventListener('click', save);
+    document.querySelector('#load').addEventListener('click', load);
+}
 
+function updateMarked() {
+    const fields = ['id', 'title', 'desc', 'date', 'imp'];
+    const noteObject = {}; //Object literal
+    for (let field of fields) {
+        noteObject[field] = document.querySelector(`#${field}`).value.trim();
+    }
+
+    noteOperation.add(noteObject);
+    printNote(noteObject);
+    //printNotes(noteOperation.getNotes());
+    showCount();
 }
 
 function deleteMarked() {
@@ -40,9 +60,11 @@ function addNote() {
     for (let field of fields) {
         noteObject[field] = document.querySelector(`#${field}`).value.trim();
     }
+
     noteOperation.add(noteObject);
     printNote(noteObject);
     showCount();
+    //storeData(noteObject);
     //const id = document.querySelector('#id').value;
     //const title = document.querySelector('#title').value;
 }
@@ -66,10 +88,24 @@ function toggleMark() {
 }
 
 function edit() {
-    console.log('Edit....');
+    //console.log('Edit....');
+    const icon = this;
+    noteOperation.update(icon.getAttribute('note-id'));
+    //noteOperation.remove(icon);
+    //printNotes(noteOperation.getNotes());
+
+
+}
+export function updateTask(obj) {
+    const fields = ['id', 'title', 'desc', 'date', 'imp'];
+
+    for (let field of fields) {
+        document.getElementById(`${field}`).value = obj[field];
+    }
+    // noteOperation.add(obj);
 }
 
-function printNotes(notes) {
+export function printNotes(notes) {
     const tbody = document.querySelector('#notes');
     tbody.innerHTML = '';
     notes.forEach(note => printNote(note));
@@ -77,7 +113,7 @@ function printNotes(notes) {
 
 }
 
-function printNote(noteObject) {
+export function printNote(noteObject) {
     const tbody = document.querySelector('#notes');
     const row = tbody.insertRow(); //<tr>
     for (let key in noteObject) {
@@ -93,8 +129,45 @@ function printNote(noteObject) {
 
 }
 
+function search() {
+    const value = prompt("enter Id");
+    if (value == '') {
+        alert("Write Id or Task title");
+    } else {
+        noteOperation.search(value);
+    }
+}
+
+function sorted() {
+    noteOperation.sort();
+    printNotes(noteOperation.getNotes());
+}
+
+function save() {
+    if (window.localStorage) {
+        const allNotes = noteOperation.getNotes();
+        localStorage.notes = JSON.stringify(allNotes);
+        alert("Data Stored..");
+    } else {
+        alert("Outdated Browser No Support of local storage..");
+    }
+
+}
+
+function load() {
+    if (window.localStorage) {
+        const allNotes = localStorage.notes;
+        noteOperation.loadData(JSON.parse(allNotes));
+    } else {
+        alert("Outdated Browser No Support of local storage..")
+    }
+}
 
 
+
+function storeData(noteObject) {
+    db.collection('notes').add(noteObject);
+}
 
 
 

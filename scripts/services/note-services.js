@@ -1,6 +1,7 @@
 //CRUD
 // Controller (I/O) + Events + Talk to Service
 import Note from '../models/note.js';
+import { printNote, printNotes, updateTask } from '../controllers/notes-controller.js';
 
 export const noteOperation = {
     notes: [],
@@ -31,17 +32,40 @@ export const noteOperation = {
     remove() {
         this.notes = this.notes.filter(note => !note.isMarked)
     },
-    search() {
+    search(id) {
+        const searchEle = this.notes.filter(e => e.id === id);
+        const tbody = document.querySelector('#notes');
+        tbody.innerHTML = '';
+        if (!searchEle.length == 0) {
+            for (const key of searchEle) {
+                printNote(key);
+            }
+        }
 
     },
+    removed(id) {
+        this.notes = this.notes.filter((e) => (e.id !== id))
+        printNotes(this.getNotes());
+        //this.total();
+    },
     sort() {
+        this.notes = this.notes.sort((a, b) => {
+            return a.id - b.id;
+        })
+    },
+    update(id) {
+        const obj = this.notes.find((e) => (e.id === id));
+        this.removed(id);
 
+        updateTask(obj);
+        //console.log(this.notes);
     },
 
     save() {
 
     },
-    load() {
-
+    loadData(newNotes) {
+        this.notes.join(newNotes);
+        printNotes(this.notes);
     }
 }
